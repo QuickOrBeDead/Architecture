@@ -7,7 +7,7 @@ using Polly.Retry;
 
 namespace GoalManager.UseCases.GoalManagement.AddGoal;
 
-public sealed class AddGoalCommandHandler(IRepository<GoalSet> goalSetRepository) : ICommandHandler<AddGoalCommand, Result<(int TeamId, int PeriodId)>>
+internal sealed class AddGoalCommandHandler(IRepository<GoalSet> goalSetRepository) : ICommandHandler<AddGoalCommand, Result<(int TeamId, int PeriodId)>>
 {
   private static readonly ResiliencePipeline RetryPipeline = new ResiliencePipelineBuilder()
     .AddRetry(new RetryStrategyOptions

@@ -88,7 +88,7 @@ public void Ctor_Throws_ArgumentNullException_when_repo_null()
 
 ---
 ## 3. UseCases Katmanı Factory Örneği
-Basit handler factory gerekirse (tekrar eden setup ağırlaşırsa) test sınıfı içinde tutulur.
+Basit handler factory gerekirse (tekrar eden setup ağırlaşırsa) test sınıfı içinde tutulur. CommandHandler ve QueryHandler için factory ekle.
 ```csharp
 private static AddGoalPeriodCommandHandler CreateHandler(IRepository<GoalPeriod>? repo = null)
   => new(repo ?? Substitute.For<IRepository<GoalPeriod>>());
@@ -107,7 +107,7 @@ Gereksiz abstraksiyon ekleme; doğrudan inline kullanmak tercih edilir.
 8. Hata mesajı assertion uygun
 9. Gereksiz parametrik test yok
 10. Paralel çalışmayı bozan paylaşılan mutable static yok
-11. Build + tüm testler geçti
+11. Build olsun ve tüm testlerin geçtiğinden emin ol
 
 ---
 ## 5. Kenar Durum Örnekleri (Kısa Rehber)

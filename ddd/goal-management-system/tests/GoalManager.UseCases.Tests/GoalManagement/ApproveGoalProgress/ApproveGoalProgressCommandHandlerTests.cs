@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Ardalis.SharedKernel;
+﻿using Ardalis.SharedKernel;
 using GoalManager.Core.GoalManagement;
 using GoalManager.Core.GoalManagement.Specifications;
 using GoalManager.UseCases.GoalManagement.ApproveGoalProgress;
@@ -35,8 +34,7 @@ public sealed class ApproveGoalProgressCommandHandlerTests
   public async Task Handle_Returns_error_when_goal_not_found()
   {
     // Arrange
-    var goalSet = GoalSet.Create(teamId: 1, periodId: 2025, userId: 5).Value;
-    SetId(goalSet, 500);
+    var goalSet = GoalSet.Create(teamId: 1, periodId: 2025, userId: 5).Value; // Id default (0) in memory
     var goalSetRepository = Substitute.For<IRepository<GoalSet>>();
     goalSetRepository.SingleOrDefaultAsync(Arg.Any<GoalSetWithGoalsByGoalSetIdSpec>(), Arg.Any<CancellationToken>())
       .Returns(goalSet);
@@ -57,16 +55,14 @@ public sealed class ApproveGoalProgressCommandHandlerTests
   public async Task Handle_Succeeds_and_updates_goal_progress_status()
   {
     // Arrange
-    var goalSet = GoalSet.Create(teamId: 2, periodId: 2030, userId: 7).Value;
-    SetId(goalSet, 777);
+    var goalSet = GoalSet.Create(teamId: 2, periodId: 2030, userId: 7).Value; // Id default (0)
 
     // Geçerli GoalValue (min < mid < max ve 1-100 aralığında)
     var goalValue = GoalValue.Create(10, 50, 100, GoalValueType.Percentage).Value;
     var addGoalResult = goalSet.AddGoal("Increase Sales", GoalType.Team, goalValue, percentage: 100);
     Assert.True(addGoalResult.IsSuccess); // Guard: test setup
 
-    var goal = goalSet.Goals.First();
-    SetId(goal, 321);
+    var goal = goalSet.Goals.First(); // goal.Id default (0)
 
     // Progress ekle (Onaylanmayı bekleyen)
     var progressResult = goalSet.UpdateGoalProgress(goal.Id, actualValue: 40, comment: "Q1 performance");
@@ -88,15 +84,6 @@ public sealed class ApproveGoalProgressCommandHandlerTests
     Assert.Empty(result.Errors);
     Assert.Equal(GoalProgressStatus.Approved, goal.GoalProgress!.Status);
     await goalSetRepository.Received(1).UpdateAsync(goalSet, Arg.Any<CancellationToken>());
-  }
-
-  private static void SetId(object entity, int id)
-  {
-    var prop = entity.GetType().GetProperty("Id", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-    if (prop?.CanWrite == true)
-    {
-      prop.SetValue(entity, id);
-    }
   }
 
   private static ApproveGoalProgressCommandHandler CreateApproveGoalProgressCommandHandler(IRepository<GoalSet>? goalSetRepository = null)

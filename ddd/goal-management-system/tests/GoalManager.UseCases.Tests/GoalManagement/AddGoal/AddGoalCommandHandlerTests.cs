@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Ardalis.SharedKernel;
+﻿using Ardalis.SharedKernel;
 using Ardalis.Specification;
 using GoalManager.Core.Exceptions;
 using GoalManager.Core.GoalManagement;
@@ -77,7 +76,7 @@ public sealed class AddGoalCommandHandlerTests
   [Fact]
   public async Task Handle_Succeeds_with_valid_percentage_goal_value()
   {
-    var goalSet = CreateGoalSet(teamId: 55, periodId: 901, userId: 700);
+    var goalSet = BuildNewGoalSet(teamId: 55, periodId: 901, userId: 700);
     var goalSetRepository = Substitute.For<IRepository<GoalSet>>();
     goalSetRepository.SingleOrDefaultAsync(Arg.Any<GoalSetWithGoalsByGoalSetIdSpec>(), Arg.Any<CancellationToken>())
       .Returns(goalSet);
@@ -108,7 +107,8 @@ public sealed class AddGoalCommandHandlerTests
   [Fact]
   public async Task Handle_Returns_error_when_AddGoal_business_rule_fails()
   {
-    var goalSet = CreateGoalSet(teamId: 10, periodId: 2025, userId: 1000, status: GoalSetStatus.Approved);
+    // Build an Approved goal set via public API (no reflection)
+    var goalSet = BuildApprovedGoalSet(teamId: 10, periodId: 2025, userId: 1000);
     var goalSetRepository = Substitute.For<IRepository<GoalSet>>();
     goalSetRepository.SingleOrDefaultAsync(Arg.Any<GoalSetWithGoalsByGoalSetIdSpec>(), Arg.Any<CancellationToken>())
       .Returns(goalSet);
@@ -124,7 +124,7 @@ public sealed class AddGoalCommandHandlerTests
   [Fact]
   public async Task Handle_Succeeds_and_updates_repository_for_number_type()
   {
-    var goalSet = CreateGoalSet(teamId: 7, periodId: 300, userId: 555);
+    var goalSet = BuildNewGoalSet(teamId: 7, periodId: 300, userId: 555);
     var goalSetRepository = Substitute.For<IRepository<GoalSet>>();
     goalSetRepository.SingleOrDefaultAsync(Arg.Any<GoalSetWithGoalsByGoalSetIdSpec>(), Arg.Any<CancellationToken>())
       .Returns(goalSet);
@@ -159,7 +159,7 @@ public sealed class AddGoalCommandHandlerTests
   [Fact]
   public async Task Handle_Retries_on_initial_Concurrency_then_succeeds()
   {
-    var goalSet = CreateGoalSet(teamId: 20, periodId: 909, userId: 1);
+    var goalSet = BuildNewGoalSet(teamId: 20, periodId: 909, userId: 1);
     var call = 0;
     var goalSetRepository = Substitute.For<IRepository<GoalSet>>();
     goalSetRepository.SingleOrDefaultAsync(Arg.Any<GoalSetWithGoalsByGoalSetIdSpec>(), Arg.Any<CancellationToken>())
@@ -189,27 +189,38 @@ public sealed class AddGoalCommandHandlerTests
     GoalValueType? valueType = null) =>
     new(goalSetId, title, GoalType.Team, min, mid, max, valueType ?? GoalValueType.Number, percentage);
 
-  private static GoalSet CreateGoalSet(int teamId, int periodId, int userId, GoalSetStatus? status = null)
+  private static GoalSet BuildNewGoalSet(int teamId, int periodId, int userId)
   {
-    var gs = (GoalSet)Activator.CreateInstance(typeof(GoalSet), nonPublic: true)!;
-    SetProp(gs, nameof(GoalSet.TeamId), teamId);
-    SetProp(gs, "PeriodId", periodId);
-    SetProp(gs, nameof(GoalSet.UserId), userId);
-    if (status != null) SetProp(gs, "Status", status);
-
-    var idProp = gs.GetType().GetProperty("Id");
-    if (idProp?.CanWrite == true)
-    {
-      idProp.SetValue(gs, teamId * 1000 + periodId);
-    }
-    return gs;
+    return GoalSet.Create(teamId, periodId, userId).Value;
   }
 
-  private static void SetProp(object target, string name, object? value)
+  private static GoalSet BuildApprovedGoalSet(int teamId, int periodId, int userId)
   {
-    var prop = target.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-               ?? throw new InvalidOperationException($"Property {name} not found on {target.GetType().Name}");
-    prop.SetValue(target, value);
+    var gsResult = GoalSet.Create(teamId, periodId, userId);
+    Assert.True(gsResult.IsSuccess);
+    var gs = gsResult.Value;
+
+    // Add a single goal with 100% percentage
+    var goalValueResult = GoalValue.Create(minValue: 10, midValue: 50, maxValue: 100, GoalValueType.Percentage);
+    Assert.True(goalValueResult.IsSuccess);
+    var addGoalResult = gs.AddGoal("Initial", GoalType.Team, goalValueResult.Value, percentage: 100);
+    Assert.True(addGoalResult.IsSuccess);
+
+    var goal = gs.Goals.First();
+
+    // Add progress and approve it
+    var progressResult = gs.UpdateGoalProgress(goal.Id, actualValue: 60, comment: null);
+    Assert.True(progressResult.IsSuccess);
+    var approveProgressResult = gs.ApproveGoalProgress(goal.Id);
+    Assert.True(approveProgressResult.IsSuccess);
+
+    // Send to approval then approve the goal set
+    var sendResult = gs.SendToApproval();
+    Assert.True(sendResult.IsSuccess);
+    var approveSetResult = gs.Approve(userId);
+    Assert.True(approveSetResult.IsSuccess);
+
+    return gs;
   }
 
   private static AddGoalCommandHandler CreateAddGoalCommandHandler(IRepository<GoalSet>? goalSetRepository = null)
