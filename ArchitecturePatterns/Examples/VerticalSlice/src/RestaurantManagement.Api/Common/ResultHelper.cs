@@ -40,7 +40,7 @@ public static class ResultHelper
     /// <summary>
     /// Converts a Result to an appropriate IResult for API responses with a custom success result
     /// </summary>
-    /// <typeparam name="T">The type of data in the result</param>
+    /// <typeparam name="T">The type of data in the result</typeparam>
     /// <param name="result">The result to convert</param>
     /// <param name="successResult">The IResult to return on success</param>
     /// <returns>An IResult with appropriate status code and error details</returns>

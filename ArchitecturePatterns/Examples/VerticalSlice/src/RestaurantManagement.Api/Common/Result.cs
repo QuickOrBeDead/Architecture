@@ -22,20 +22,16 @@ public interface IResult
 public sealed class Result<T> : IResult
 {
     private Dictionary<string, object>? _errorDetails;
-    public bool IsSuccess { get; private set; }
+    public bool IsSuccess { get; private init; }
     public T? Data { get; private set; }
-    public string? ErrorMessage { get; private set; }
-    public ResultType ResultType { get; private set; }
+    public string? ErrorMessage { get; private init; }
+    public ResultType ResultType { get; private init; }
 
     public Dictionary<string, object> ErrorDetails
     {
         get
         {
             return _errorDetails ??= [];
-        }
-        private set
-        {
-            _errorDetails = value;
         }
     }
 
