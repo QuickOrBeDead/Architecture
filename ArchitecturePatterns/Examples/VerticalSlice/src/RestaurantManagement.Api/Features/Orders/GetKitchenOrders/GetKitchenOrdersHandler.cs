@@ -9,7 +9,7 @@ using RestaurantManagement.Api.Entities;
 
 public record GetKitchenOrdersQuery : IRequest<GetKitchenOrdersResponse>;
 
-public class GetKitchenOrdersHandler(RestaurantDbContext context)
+public sealed class GetKitchenOrdersHandler(RestaurantDbContext context)
     : IRequestHandler<GetKitchenOrdersQuery, GetKitchenOrdersResponse>
 {
     public async ValueTask<GetKitchenOrdersResponse> Handle(GetKitchenOrdersQuery request, CancellationToken cancellationToken)

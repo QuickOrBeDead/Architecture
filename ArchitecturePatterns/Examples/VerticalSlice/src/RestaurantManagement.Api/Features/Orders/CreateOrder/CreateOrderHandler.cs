@@ -9,7 +9,7 @@ using RestaurantManagement.Api.Entities;
 
 public record CreateOrderCommand(int TableId, List<OrderItemRequest> Items, string? Notes) : IRequest<Result<CreateOrderResponse>>;
 
-public class CreateOrderHandler(RestaurantDbContext context) : IRequestHandler<CreateOrderCommand, Result<CreateOrderResponse>>
+public sealed class CreateOrderHandler(RestaurantDbContext context) : IRequestHandler<CreateOrderCommand, Result<CreateOrderResponse>>
 {
     public async ValueTask<Result<CreateOrderResponse>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {

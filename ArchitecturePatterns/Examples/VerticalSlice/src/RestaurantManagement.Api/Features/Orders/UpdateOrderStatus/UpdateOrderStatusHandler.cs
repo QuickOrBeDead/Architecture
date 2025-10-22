@@ -9,7 +9,7 @@ using RestaurantManagement.Api.Entities;
 
 public record UpdateOrderStatusCommand(int OrderId, OrderStatus NewStatus) : IRequest<Result<UpdateOrderStatusResponse>>;
 
-public class UpdateOrderStatusHandler(RestaurantDbContext context)
+public sealed class UpdateOrderStatusHandler(RestaurantDbContext context)
     : IRequestHandler<UpdateOrderStatusCommand, Result<UpdateOrderStatusResponse>>
 {
     public async ValueTask<Result<UpdateOrderStatusResponse>> Handle(UpdateOrderStatusCommand request, CancellationToken cancellationToken)

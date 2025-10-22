@@ -7,9 +7,10 @@ using RestaurantManagement.Api.Data;
 using RestaurantManagement.Api.Features.MenuItems.GetMenuItems;
 
 namespace RestaurantManagement.Api.Features.Tables.GetAllTables;
+
 public record GetAllTablesQuery : IRequest<GetAllTablesResponse>;
 
-public class GetAllTablesHandler(RestaurantDbContext context) : IRequestHandler<GetAllTablesQuery, GetAllTablesResponse>
+public sealed class GetAllTablesHandler(RestaurantDbContext context) : IRequestHandler<GetAllTablesQuery, GetAllTablesResponse>
 {
     public async ValueTask<GetAllTablesResponse> Handle(GetAllTablesQuery request, CancellationToken cancellationToken)
     {

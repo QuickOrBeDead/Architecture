@@ -9,7 +9,7 @@ using RestaurantManagement.Api.Data;
 
 public record GetMenuItemsQuery(string? Category = null) : IRequest<Result<GetMenuItemsResponse>>;
 
-public class GetMenuItemsHandler(RestaurantDbContext context) : IRequestHandler<GetMenuItemsQuery, Result<GetMenuItemsResponse>>
+public sealed class GetMenuItemsHandler(RestaurantDbContext context) : IRequestHandler<GetMenuItemsQuery, Result<GetMenuItemsResponse>>
 {
     public async ValueTask<Result<GetMenuItemsResponse>> Handle(GetMenuItemsQuery request, CancellationToken cancellationToken)
     {
