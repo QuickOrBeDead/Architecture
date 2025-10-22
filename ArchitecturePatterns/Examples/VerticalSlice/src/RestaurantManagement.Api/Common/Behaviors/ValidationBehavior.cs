@@ -1,24 +1,23 @@
 using FluentValidation;
 using Mediator;
-using RestaurantManagement.Api.Common;
 
 namespace RestaurantManagement.Api.Common.Behaviors;
 
 /// <summary>
 /// Pipeline behavior for validating requests using FluentValidation.
 /// This behavior runs before the request handler and validates the request object.
-/// If validation fails, it throws a ValidationException with detailed error information.
+/// If validation fails, it returns a Result object with validation error details.
 /// </summary>
 /// <typeparam name="TRequest">The type of the request to validate</typeparam>
-/// <typeparam name="TResponse">The type of the response</typeparam>
+/// <typeparam name="TResponse">The type of the response (must implement IResult)</typeparam>
 public sealed class ValidationBehavior<TRequest, TResponse>(
     IEnumerable<IValidator<TRequest>> validators,
-    ILogger<ValidationBehavior<TRequest, TResponse>> logger) : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>
+    ILogger<ValidationBehavior<TRequest, TResponse>> logger) : IPipelineBehavior<TRequest, Result<TResponse>>
+    where TRequest : IRequest<Result<TResponse>>
 {
-    public async ValueTask<TResponse> Handle(
+    public async ValueTask<Result<TResponse>> Handle(
         TRequest message,
-        MessageHandlerDelegate<TRequest, TResponse> next,
+        MessageHandlerDelegate<TRequest, Result<TResponse>> next,
         CancellationToken cancellationToken)
     {
         // If no validators are registered for this request type, skip validation
@@ -54,9 +53,13 @@ public sealed class ValidationBehavior<TRequest, TResponse>(
                 .GroupBy(f => f.PropertyName)
                 .ToDictionary(
                     g => g.Key,
-                    g => g.Select(f => f.ErrorMessage).ToArray());
+                    object (g) => g.Select(f => f.ErrorMessage).ToArray());
 
-            throw new ValidationException(failures);
+            // Return validation errors as Result object
+            return Result<TResponse>.Failure(
+                $"Validation failed for {requestName}",
+                ResultType.Failure,
+                propertyErrors);
         }
 
         // Log successful validation for debugging purposes

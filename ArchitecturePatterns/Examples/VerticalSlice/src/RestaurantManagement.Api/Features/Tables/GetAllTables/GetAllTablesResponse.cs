@@ -1,5 +1,3 @@
-using RestaurantManagement.Api.Features.Tables.GetAllTables;
-
 namespace RestaurantManagement.Api.Features.MenuItems.GetMenuItems;
 
 public record GetAllTablesResponse(List<TableDto> Tables);

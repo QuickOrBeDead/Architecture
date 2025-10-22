@@ -1,5 +1,4 @@
 using Mediator;
-using RestaurantManagement.Api.Features.Orders.GetKitchenOrders;
 
 namespace RestaurantManagement.Api.Features.Orders.GetKitchenOrders;
 

@@ -4,15 +4,16 @@ using Mediator;
 
 using Microsoft.EntityFrameworkCore;
 
+using RestaurantManagement.Api.Common;
 using RestaurantManagement.Api.Data;
 using RestaurantManagement.Api.Entities;
 
-public record UpdateTableStatusCommand(int TableId, TableStatus NewStatus) : IRequest<UpdateTableStatusResponse>;
+public record UpdateTableStatusCommand(int TableId, TableStatus NewStatus) : IRequest<Result<UpdateTableStatusResponse>>;
 
 public class UpdateTableStatusHandler(RestaurantDbContext context)
-    : IRequestHandler<UpdateTableStatusCommand, UpdateTableStatusResponse>
+    : IRequestHandler<UpdateTableStatusCommand, Result<UpdateTableStatusResponse>>
 {
-    public async ValueTask<UpdateTableStatusResponse> Handle(UpdateTableStatusCommand request, CancellationToken cancellationToken)
+    public async ValueTask<Result<UpdateTableStatusResponse>> Handle(UpdateTableStatusCommand request, CancellationToken cancellationToken)
     {
         var table = await context.Tables
                         .FirstOrDefaultAsync(t => t.Id == request.TableId, cancellationToken);
@@ -33,6 +34,6 @@ public class UpdateTableStatusHandler(RestaurantDbContext context)
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return new UpdateTableStatusResponse(table.Id, table.TableNumber, table.Status.ToString());
+        return Result<UpdateTableStatusResponse>.Success(new UpdateTableStatusResponse(table.Id, table.TableNumber, table.Status.ToString()));
     }
 }

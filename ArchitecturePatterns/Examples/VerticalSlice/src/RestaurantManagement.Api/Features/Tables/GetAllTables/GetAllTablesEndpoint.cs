@@ -1,6 +1,5 @@
 using Mediator;
 using RestaurantManagement.Api.Features.MenuItems.GetMenuItems;
-using RestaurantManagement.Api.Features.Tables.GetAllTables;
 
 namespace RestaurantManagement.Api.Features.Tables.GetAllTables;
 

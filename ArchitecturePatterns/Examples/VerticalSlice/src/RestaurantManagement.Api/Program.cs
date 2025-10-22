@@ -1,15 +1,18 @@
 using FluentValidation;
+
+using Mediator;
+
 using Microsoft.EntityFrameworkCore;
+
+using RestaurantManagement.Api.Common;
 using RestaurantManagement.Api.Common.Behaviors;
 using RestaurantManagement.Api.Data;
-using RestaurantManagement.Api.Features.MenuItems;
 using RestaurantManagement.Api.Features.MenuItems.GetMenuItems;
 using RestaurantManagement.Api.Features.Orders.CreateOrder;
 using RestaurantManagement.Api.Features.Orders.GetKitchenOrders;
 using RestaurantManagement.Api.Features.Orders.UpdateOrderStatus;
 using RestaurantManagement.Api.Features.Tables.GetAllTables;
 using RestaurantManagement.Api.Features.Tables.UpdateTableStatus;
-using System.Reflection;
 
 using Scalar.AspNetCore;
 
@@ -24,7 +27,7 @@ builder.Services.AddDbContext<RestaurantDbContext>(options =>
     options.UseInMemoryDatabase("RestaurantDb"));
 
 // Register FluentValidation validators
-builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly, ServiceLifetime.Singleton);
 
 // Mediator - source generator based, high performance with pipeline behaviors
 builder.Services.AddMediator(options =>
@@ -32,8 +35,22 @@ builder.Services.AddMediator(options =>
     options.ServiceLifetime = ServiceLifetime.Scoped;
 });
 
-// Register pipeline behaviors for cross-cutting concerns
-builder.Services.AddSingleton(typeof(Mediator.IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+// Register ValidationBehavior as open generic
+builder.Services.AddSingleton(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
+// Register ValidationBehavior for each discovered IRequest<Result<TResponse>> type
+foreach (var type in typeof(Program).Assembly.GetTypes())
+{
+    foreach (var responseType in type.GetInterfaces()
+                 .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>))
+                 .Select(requestInterface => requestInterface.GetGenericArguments()[0])
+                 .Where(responseType => responseType.IsGenericType && responseType.GetGenericTypeDefinition() == typeof(Result<>)))
+    {
+        builder.Services.AddSingleton(
+            typeof(IPipelineBehavior<,>).MakeGenericType(type, responseType), 
+            typeof(ValidationBehavior<,>).MakeGenericType(type, responseType.GetGenericArguments()[0]));
+    }
+}
 
 var app = builder.Build();
 

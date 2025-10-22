@@ -1,5 +1,4 @@
 using Mediator;
-using RestaurantManagement.Api.Features.MenuItems.GetMenuItems;
 
 namespace RestaurantManagement.Api.Features.Tables.UpdateTableStatus;
 

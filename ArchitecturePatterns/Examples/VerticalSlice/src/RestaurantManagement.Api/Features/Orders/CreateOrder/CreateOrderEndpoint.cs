@@ -1,5 +1,5 @@
 using Mediator;
-using RestaurantManagement.Api.Features.Orders.CreateOrder;
+
 using RestaurantManagement.Api.Common;
 
 namespace RestaurantManagement.Api.Features.Orders.CreateOrder;

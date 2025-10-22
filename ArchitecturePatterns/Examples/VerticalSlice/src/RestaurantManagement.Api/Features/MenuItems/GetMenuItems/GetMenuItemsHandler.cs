@@ -4,13 +4,14 @@ using Mediator;
 
 using Microsoft.EntityFrameworkCore;
 
+using RestaurantManagement.Api.Common;
 using RestaurantManagement.Api.Data;
 
-public record GetMenuItemsQuery(string? Category = null) : IRequest<GetMenuItemsResponse>;
+public record GetMenuItemsQuery(string? Category = null) : IRequest<Result<GetMenuItemsResponse>>;
 
-public class GetMenuItemsHandler(RestaurantDbContext context) : IRequestHandler<GetMenuItemsQuery, GetMenuItemsResponse>
+public class GetMenuItemsHandler(RestaurantDbContext context) : IRequestHandler<GetMenuItemsQuery, Result<GetMenuItemsResponse>>
 {
-    public async ValueTask<GetMenuItemsResponse> Handle(GetMenuItemsQuery request, CancellationToken cancellationToken)
+    public async ValueTask<Result<GetMenuItemsResponse>> Handle(GetMenuItemsQuery request, CancellationToken cancellationToken)
     {
         var query = context.MenuItems.AsQueryable();
 
@@ -32,6 +33,6 @@ public class GetMenuItemsHandler(RestaurantDbContext context) : IRequestHandler<
                                 m.IsAvailable))
                             .ToListAsync(cancellationToken);
 
-        return new GetMenuItemsResponse(menuItems);
+        return Result<GetMenuItemsResponse>.Success(new GetMenuItemsResponse(menuItems));
     }
 }

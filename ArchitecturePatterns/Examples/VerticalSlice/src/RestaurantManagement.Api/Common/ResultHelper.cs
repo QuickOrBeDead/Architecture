@@ -9,7 +9,7 @@ public static class ResultHelper
     /// <param name="result">The result to convert</param>
     /// <param name="successStatusCode">The status code to return on success (default: 200 OK)</param>
     /// <returns>An IResult with appropriate status code and error details</returns>
-    public static IResult ToApiResult<T>(this Result<T> result, int successStatusCode = StatusCodes.Status200OK)
+    public static Microsoft.AspNetCore.Http.IResult ToApiResult<T>(this Result<T> result, int successStatusCode = StatusCodes.Status200OK)
     {
         if (result.IsSuccess)
         {
@@ -40,11 +40,11 @@ public static class ResultHelper
     /// <summary>
     /// Converts a Result to an appropriate IResult for API responses with a custom success result
     /// </summary>
-    /// <typeparam name="T">The type of data in the result</typeparam>
+    /// <typeparam name="T">The type of data in the result</param>
     /// <param name="result">The result to convert</param>
     /// <param name="successResult">The IResult to return on success</param>
     /// <returns>An IResult with appropriate status code and error details</returns>
-    public static IResult ToApiResult<T>(this Result<T> result, Func<T?, IResult> successResult)
+    public static Microsoft.AspNetCore.Http.IResult ToApiResult<T>(this Result<T> result, Func<T?, Microsoft.AspNetCore.Http.IResult> successResult)
     {
         if (result.IsSuccess)
         {
@@ -64,5 +64,19 @@ public static class ResultHelper
             ResultType.Failure => Results.BadRequest(errorDetails),
             _ => Results.BadRequest(errorDetails)
         };
+    }
+
+    /// <summary>
+    /// Creates a validation failure result for any Result{T} type.
+    /// This method is used by the ValidationBehavior to create validation errors
+    /// without using reflection.
+    /// </summary>
+    /// <typeparam name="T">The type parameter for Result{T}</typeparam>
+    /// <param name="errorMessages">List of validation error messages</param>
+    /// <param name="propertyErrors">Dictionary of property-specific errors</param>
+    /// <returns>A Result{T} failure with validation errors</returns>
+    public static Result<T> CreateValidationFailure<T>(List<string> errorMessages, Dictionary<string, string[]> propertyErrors)
+    {
+        return Result<T>.ValidationFailure(errorMessages, propertyErrors);
     }
 }
