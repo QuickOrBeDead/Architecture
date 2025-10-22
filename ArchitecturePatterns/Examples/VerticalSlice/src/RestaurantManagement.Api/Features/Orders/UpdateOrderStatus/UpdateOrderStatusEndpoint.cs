@@ -14,7 +14,7 @@ public static class UpdateOrderStatusEndpoint
         {
             var command = new UpdateOrderStatusCommand(orderId, request.Status);
             var result = await mediator.Send(command);
-            return ResultHelper.ToApiResult(result);
+            return result.ToApiResult();
         })
         .WithName("UpdateOrderStatus")
         .WithSummary("Update order status")

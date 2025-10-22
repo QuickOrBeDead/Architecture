@@ -20,7 +20,7 @@ public sealed class UpdateTableStatusHandler(RestaurantDbContext context)
 
         if (table == null)
         {
-            throw new KeyNotFoundException($"Table with ID {request.TableId} not found");
+            return Result<UpdateTableStatusResponse>.NotFound($"Table with ID {request.TableId} not found");
         }
 
         table.Status = request.NewStatus;

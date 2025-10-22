@@ -79,3 +79,6 @@ app.MapGetAllTables();
 app.MapUpdateTableStatus();
 
 await app.RunAsync().ConfigureAwait(false);
+
+// Make Program class accessible for testing
+public partial class Program { }

@@ -1,4 +1,5 @@
 using Mediator;
+using RestaurantManagement.Api.Common;
 
 namespace RestaurantManagement.Api.Features.Tables.UpdateTableStatus;
 
@@ -13,7 +14,7 @@ public static class UpdateTableStatusEndpoint
         {
             var command = new UpdateTableStatusCommand(tableId, request.Status);
             var result = await mediator.Send(command);
-            return Results.Ok(result);
+            return result.ToApiResult();
         })
         .WithName("UpdateTableStatus")
         .WithSummary("Update table status")

@@ -1,6 +1,7 @@
 namespace RestaurantManagement.Api.Features.MenuItems.GetMenuItems;
 
 using Mediator;
+using RestaurantManagement.Api.Common;
 
 public static class GetMenuItemsEndpoint
 {
@@ -12,7 +13,7 @@ public static class GetMenuItemsEndpoint
         {
             var query = new GetMenuItemsQuery(category);
             var result = await mediator.Send(query);
-            return Results.Ok(result);
+            return result.ToApiResult();
         })
         .WithName("GetMenuItems")
         .WithSummary("Get menu items, optionally filtered by category")
