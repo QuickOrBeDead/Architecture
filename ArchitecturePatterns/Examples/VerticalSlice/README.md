@@ -8,37 +8,68 @@ Vertical Slice Architecture, uygulamayı teknik katmanlar yerine **özellikler (
 
 ## 🏗️ Mimari Yapı
 
-### Vertical Slice Architecture Prensipleri
+### 📁 Klasör Yapısı
 
 ```
 RestaurantManagement.Api/
-├── Features/
-│   ├── Tables/              # Masa Yönetimi Slice
-│   │   ├── Table.cs         # Entity
-│   │   ├── TablesController.cs
-│   │   ├── GetAllTables/
-│   │   │   └── GetAllTablesQuery.cs
-│   │   └── UpdateTableStatus/
-│   │       └── UpdateTableStatusCommand.cs
-│   │
-│   ├── MenuItems/           # Menü Yönetimi Slice
-│   │   ├── MenuItem.cs
-│   │   ├── MenuItemsController.cs
-│   │   └── GetMenuItems/
-│   │       └── GetMenuItemsQuery.cs
-│   │
-│   └── Orders/              # Sipariş Yönetimi Slice
-│       ├── Order.cs
-│       ├── OrdersController.cs
-│       ├── CreateOrder/
-│       │   └── CreateOrderCommand.cs
-│       ├── UpdateOrderStatus/
-│       │   └── UpdateOrderStatusCommand.cs
-│       └── GetKitchenOrders/
-│           └── GetKitchenOrdersQuery.cs
 │
-└── Data/
-    └── RestaurantDbContext.cs   # Paylaşılan veritabanı bağlamı
+├── Features/                          # Her feature bağımsız bir "slice"
+│   │
+│   ├── Tables/                        # 🪑 Masa Yönetimi Feature
+│   │   ├── GetAllTables/
+│   │   │   ├── GetAllTablesEndpoint.cs     # API endpoint
+│   │   │   ├── GetAllTablesHandler.cs      # İş mantığı handler
+│   │   │   └── GetAllTablesResponse.cs     # Response DTO
+│   │   └── UpdateTableStatus/
+│   │       ├── UpdateTableStatusEndpoint.cs    # API endpoint
+│   │       ├── UpdateTableStatusHandler.cs     # İş mantığı handler
+│   │       ├── UpdateTableStatusRequest.cs     # Request DTO
+│   │       ├── UpdateTableStatusResponse.cs    # Response DTO
+│   │       └── UpdateTableStatusValidator.cs   # Validation kuralları
+│   │
+│   ├── MenuItems/                     # 📋 Menü Yönetimi Feature
+│   │   └── GetMenuItems/
+│   │       ├── GetMenuItemsEndpoint.cs     # API endpoint
+│   │       ├── GetMenuItemsHandler.cs      # İş mantığı handler
+│   │       ├── GetMenuItemsResponse.cs     # Response DTO
+│   │       └── GetMenuItemsValidator.cs    # Validation kuralları
+│   │
+│   └── Orders/                        # 🍽️ Sipariş Yönetimi Feature
+│       ├── CreateOrder/
+│       │   ├── CreateOrderEndpoint.cs      # API endpoint
+│       │   ├── CreateOrderHandler.cs       # İş mantığı handler
+│       │   ├── CreateOrderRequest.cs       # Request DTO
+│       │   ├── CreateOrderResponse.cs      # Response DTO
+│       │   └── CreateOrderValidator.cs     # Validation kuralları
+│       ├── UpdateOrderStatus/
+│       │   ├── UpdateOrderStatusEndpoint.cs    # API endpoint
+│       │   ├── UpdateOrderStatusHandler.cs     # İş mantığı handler
+│       │   ├── UpdateOrderStatusRequest.cs     # Request DTO
+│       │   ├── UpdateOrderStatusResponse.cs    # Response DTO
+│       │   └── UpdateOrderStatusValidator.cs   # Validation kuralları
+│       └── GetKitchenOrders/
+│           ├── GetKitchenOrdersEndpoint.cs     # API endpoint
+│           ├── GetKitchenOrdersHandler.cs      # İş mantığı handler
+│           └── GetKitchenOrdersResponse.cs     # Response DTO
+│
+├── Entities/                          # 🏗️ Shared Domain Entities
+│   ├── Table.cs                       # Masa entity'si
+│   ├── TableStatus.cs                 # Masa durumu enum
+│   ├── MenuItem.cs                    # Menü öğesi entity'si
+│   ├── Order.cs                       # Sipariş entity'si
+│   ├── OrderItem.cs                   # Sipariş kalemi entity'si
+│   └── OrderStatus.cs                 # Sipariş durumu enum
+│
+├── Common/                            # 🔧 Ortak Utilities ve Behaviors
+│   ├── Result.cs                      # Result pattern implementation
+│   ├── ResultHelper.cs               # Result helper methods
+│   └── Behaviors/                     # MediatR behaviors
+│       └── ValidationBehavior.cs      # Otomatik validation behavior
+│
+├── Data/
+│   └── RestaurantDbContext.cs         # Shared database context
+│
+└── Program.cs                         # Application startup
 ```
 
 ### Temel Özellikler
@@ -102,7 +133,7 @@ dotnet run
 4. **Scalar UI'a gidin:**
 
 ```
-https://localhost:5001/scalar
+http://localhost:5143/scalar
 ```
 
 ## 🔍 API Endpoints
@@ -139,7 +170,7 @@ PUT /api/tables/{tableId}/status
 
 ```json
 {
-  "status": "Occupied"  // Available, Occupied, Reserved, Cleaning
+  "status": 2  // Available, Occupied, Reserved, Cleaning
 }
 ```
 
@@ -227,7 +258,7 @@ PUT /api/orders/{orderId}/status
 
 ```json
 {
-  "status": "Preparing"  // Pending, Confirmed, Preparing, Ready, Served, Completed, Cancelled
+  "status": 2  // Pending, Confirmed, Preparing, Ready, Served, Completed, Cancelled
 }
 ```
 
@@ -304,31 +335,37 @@ GET /api/orders/kitchen
 Her feature'ın kendi klasörü vardır:
 
 ```
-Features/Orders/
-├── Order.cs                      # Domain model
-├── OrdersController.cs           # API endpoint
-├── CreateOrder/
-│   └── CreateOrderCommand.cs     # Command + Handler + Validator
-└── GetKitchenOrders/
-    └── GetKitchenOrdersQuery.cs  # Query + Handler
+Features/Orders/                        # 🍽️ Sipariş Yönetimi Feature
+│       ├── CreateOrder/
+│       │   ├── CreateOrderEndpoint.cs      # API endpoint
+│       │   ├── CreateOrderHandler.cs       # İş mantığı handler
+│       │   ├── CreateOrderRequest.cs       # Request DTO
+│       │   ├── CreateOrderResponse.cs      # Response DTO
+│       │   └── CreateOrderValidator.cs     # Validation kuralları
+│       ├── UpdateOrderStatus/
+│       │   ├── UpdateOrderStatusEndpoint.cs    # API endpoint
+│       │   ├── UpdateOrderStatusHandler.cs     # İş mantığı handler
+│       │   ├── UpdateOrderStatusRequest.cs     # Request DTO
+│       │   ├── UpdateOrderStatusResponse.cs    # Response DTO
+│       │   └── UpdateOrderStatusValidator.cs   # Validation kuralları
 ```
 
 ### 2. CQRS with Mediator
 
 ```csharp
 // Command
-public record CreateOrderCommand(...) : IRequest<OrderDto>;
+public record CreateOrderCommand(...) : IRequest<CreateOrderResponse>;
 
 // Handler
-public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, OrderDto>
+public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, CreateOrderResponse>
 {
-    public async ValueTask<OrderDto> Handle(CreateOrderCommand request, CancellationToken ct)
+    public async ValueTask<CreateOrderResponse> Handle(CreateOrderCommand request, CancellationToken ct)
     {
         // Business logic here
     }
 }
 
-// Usage in Controller
+// Usage in Endpoint
 await _mediator.Send(new CreateOrderCommand(...));
 ```
 
@@ -362,6 +399,19 @@ public class CreateOrderValidator : AbstractValidator<CreateOrderCommand>
 - [Mediator - Source Generator Based](https://github.com/martinothamar/Mediator)
 - [CQRS Pattern](https://martinfowler.com/bliki/CQRS.html)
 - [Feature Slices for ASP.NET Core MVC](https://docs.microsoft.com/en-us/archive/msdn-magazine/2016/september/asp-net-core-feature-slices-for-asp-net-core-mvc)
+
+## 🚀 Yeni Feature Ekleme
+
+Yeni bir feature eklemek için:
+
+1. `Features/` altında yeni klasör oluştur
+2. Entity oluştur (gerekiyorsa `Entities/` klasöründe)
+3. API Endpoint'leri oluştur
+4. Command/Query request'lerini oluştur
+5. Handler'ları implement et (Command/Query Handler)
+6. Request/Response DTOs oluştur
+7. Validator ekle (gerekiyorsa)
+8. Çalıştır ve test et!
 
 ## 🤝 Katkıda Bulunma
 

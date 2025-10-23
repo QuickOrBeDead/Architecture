@@ -1,5 +1,19 @@
 @RestaurantManagement.Api_HostAddress = http://localhost:5143
 
+# Get all tables
+GET {{RestaurantManagement.Api_HostAddress}}/api/tables
+
+###
+
+# Update table status
+# Status values: 1=Available, 2=Occupied, 3=Reserved, 4=Cleaning
+PUT {{RestaurantManagement.Api_HostAddress}}/api/tables/2/status
+Content-Type: application/json
+
+{
+  "status": 2
+}
+
 ###
 
 # Get all menu items

@@ -8,28 +8,55 @@ RestaurantManagement.Api/
 ├── Features/                          # Her feature bağımsız bir "slice"
 │   │
 │   ├── Tables/                        # 🪑 Masa Yönetimi Feature
-│   │   ├── Table.cs                   # Domain entity
-│   │   ├── TablesController.cs        # API endpoints
 │   │   ├── GetAllTables/
-│   │   │   └── GetAllTablesQuery.cs   # Query + Handler + DTO
+│   │   │   ├── GetAllTablesEndpoint.cs     # API endpoint
+│   │   │   ├── GetAllTablesHandler.cs      # İş mantığı handler
+│   │   │   └── GetAllTablesResponse.cs     # Response DTO
 │   │   └── UpdateTableStatus/
-│   │       └── UpdateTableStatusCommand.cs  # Command + Handler + Validator + DTO
+│   │       ├── UpdateTableStatusEndpoint.cs    # API endpoint
+│   │       ├── UpdateTableStatusHandler.cs     # İş mantığı handler
+│   │       ├── UpdateTableStatusRequest.cs     # Request DTO
+│   │       ├── UpdateTableStatusResponse.cs    # Response DTO
+│   │       └── UpdateTableStatusValidator.cs   # Validation kuralları
 │   │
 │   ├── MenuItems/                     # 📋 Menü Yönetimi Feature
-│   │   ├── MenuItem.cs                # Domain entity
-│   │   ├── MenuItemsController.cs     # API endpoints
 │   │   └── GetMenuItems/
-│   │       └── GetMenuItemsQuery.cs   # Query + Handler + DTO
+│   │       ├── GetMenuItemsEndpoint.cs     # API endpoint
+│   │       ├── GetMenuItemsHandler.cs      # İş mantığı handler
+│   │       ├── GetMenuItemsResponse.cs     # Response DTO
+│   │       └── GetMenuItemsValidator.cs    # Validation kuralları
 │   │
 │   └── Orders/                        # 🍽️ Sipariş Yönetimi Feature
-│       ├── Order.cs                   # Domain entities
-│       ├── OrdersController.cs        # API endpoints
 │       ├── CreateOrder/
-│       │   └── CreateOrderCommand.cs  # Command + Handler + Validator + DTO
+│       │   ├── CreateOrderEndpoint.cs      # API endpoint
+│       │   ├── CreateOrderHandler.cs       # İş mantığı handler
+│       │   ├── CreateOrderRequest.cs       # Request DTO
+│       │   ├── CreateOrderResponse.cs      # Response DTO
+│       │   └── CreateOrderValidator.cs     # Validation kuralları
 │       ├── UpdateOrderStatus/
-│       │   └── UpdateOrderStatusCommand.cs
+│       │   ├── UpdateOrderStatusEndpoint.cs    # API endpoint
+│       │   ├── UpdateOrderStatusHandler.cs     # İş mantığı handler
+│       │   ├── UpdateOrderStatusRequest.cs     # Request DTO
+│       │   ├── UpdateOrderStatusResponse.cs    # Response DTO
+│       │   └── UpdateOrderStatusValidator.cs   # Validation kuralları
 │       └── GetKitchenOrders/
-│           └── GetKitchenOrdersQuery.cs  # Query + Handler + DTO
+│           ├── GetKitchenOrdersEndpoint.cs     # API endpoint
+│           ├── GetKitchenOrdersHandler.cs      # İş mantığı handler
+│           └── GetKitchenOrdersResponse.cs     # Response DTO
+│
+├── Entities/                          # 🏗️ Shared Domain Entities
+│   ├── Table.cs                       # Masa entity'si
+│   ├── TableStatus.cs                 # Masa durumu enum
+│   ├── MenuItem.cs                    # Menü öğesi entity'si
+│   ├── Order.cs                       # Sipariş entity'si
+│   ├── OrderItem.cs                   # Sipariş kalemi entity'si
+│   └── OrderStatus.cs                 # Sipariş durumu enum
+│
+├── Common/                            # 🔧 Ortak Utilities ve Behaviors
+│   ├── Result.cs                      # Result pattern implementation
+│   ├── ResultHelper.cs               # Result helper methods
+│   └── Behaviors/                     # MediatR behaviors
+│       └── ValidationBehavior.cs      # Otomatik validation behavior
 │
 ├── Data/
 │   └── RestaurantDbContext.cs         # Shared database context
@@ -41,15 +68,27 @@ RestaurantManagement.Api/
 
 Her feature (slice) kendi içinde:
 
-- ✅ Entity (domain model)
-- ✅ Controller (API endpoints)
-- ✅ Commands (veri değiştiren işlemler)
-- ✅ Queries (veri okuyan işlemler)
-- ✅ Handlers (iş mantığı)
-- ✅ Validators (validation)
-- ✅ DTOs (data transfer objects)
+- ✅ API Endpoints (HTTP endpoint'leri)
+- ✅ Commands (veri değiştiren request'ler)
+- ✅ Queries (veri okuyan request'ler)
+- ✅ Handlers (asıl iş mantığını yapan sınıflar)
+- ✅ Request/Response DTOs (veri transfer nesneleri)
+- ✅ Validators (input validation kuralları)
 
 barındırır.
+
+**📝 Not:** 
+
+- **Commands:** Veri değiştiren işlemler için request nesneleri (Create, Update, Delete)
+- **Queries:** Veri okuyan işlemler için request nesneleri (Get, List)
+- **Handlers:** Commands ve Queries'i işleyerek asıl iş mantığını gerçekleştiren sınıflar
+- **DTOs:** API'ye gelen ve dönen veri yapıları
+
+**📋 Shared Components:**
+
+- ✅ Entities (domain models) - `Entities/` klasöründe ortak kullanım
+- ✅ Common utilities - `Common/` klasöründe paylaşılan helper'lar
+- ✅ Database context - `Data/` klasöründe merkezi DB erişimi
 
 ## 🔄 İstek Akışı
 
@@ -58,9 +97,9 @@ barındırır.
 ```
 1. HTTP POST /api/orders
    ↓
-2. OrdersController.CreateOrder()
+2. CreateOrderEndpoint
    ↓
-3. Mediator Send(CreateOrderCommand)
+3. Mediator Send(CreateOrderRequest) → Command
    ↓
 4. CreateOrderValidator (FluentValidation)
    ↓
@@ -68,7 +107,7 @@ barındırır.
    ↓
 6. RestaurantDbContext (Database)
    ↓
-7. Return OrderDto
+7. Return CreateOrderResponse
    ↓
 8. HTTP 201 Created Response
 ```
@@ -92,6 +131,12 @@ barındırır.
 - Yeni feature eklemek çok kolay
 - Feature silinmesi de kolay
 - Microservice'e dönüştürme kolay
+
+### ✅ Hibrit Yaklaşım
+
+- Domain entities ortak kullanım için merkezi konumda
+- Feature-specific logic her feature'da ayrı
+- Paylaşılan utilities `Common/` klasöründe
 
 ## 🆚 Geleneksel Katmanlı Mimari ile Karşılaştırma
 
@@ -136,9 +181,11 @@ Features/
 
 ### CQRS (Command Query Responsibility Segregation)
 
-- **Command:** Veri değiştiren işlemler
-- **Query:** Veri okuyan işlemler
-- Mediator ile implement edilmiş
+- **Commands:** Veri değiştiren işlemler için request nesneleri (CreateOrder, UpdateTableStatus)
+- **Queries:** Veri okuyan işlemler için request nesneleri (GetAllTables, GetMenuItems)
+- **Command Handlers:** Command'ları işleyerek veri değiştiren sınıflar
+- **Query Handlers:** Query'leri işleyerek veri okuyan sınıflar
+- Mediator ile Command/Query → Handler yönlendirmesi
 
 ### Mediator Pattern
 
@@ -155,6 +202,16 @@ Features/
 
 - API response'lar için özel nesneler
 - Domain entity'leri doğrudan expose etmeyiz
+
+### Result Pattern
+
+- `Result.cs` ve `ResultHelper.cs` ile başarı/hata yönetimi
+- Exception throwing yerine functional approach
+
+### Validation Behavior
+
+- `ValidationBehavior.cs` ile MediatR pipeline'ında otomatik validation
+- Tüm command'lar için merkezi validation işlemi
 
 ## 📊 Feature'lar ve Endpoint'ler
 
@@ -180,11 +237,12 @@ Features/
 Yeni bir feature eklemek için:
 
 1. `Features/` altında yeni klasör oluştur
-2. Entity oluştur
-3. Controller oluştur
-4. Gerekli Command/Query'leri oluştur
-5. Handler'ları implement et
-6. Validator ekle (gerekiyorsa)
-7. Çalıştır ve test et!
+2. Entity oluştur (gerekiyorsa `Entities/` klasöründe)
+3. API Endpoint'leri oluştur
+4. Command/Query request'lerini oluştur
+5. Handler'ları implement et (Command/Query Handler)
+6. Request/Response DTOs oluştur
+7. Validator ekle (gerekiyorsa)
+8. Çalıştır ve test et!
 
 **Bu kadar basit!** 🎉

@@ -13,14 +13,14 @@
 - ✅ Table entity ve TableStatus enum
 - ✅ GetAllTables query (tüm masaları listele)
 - ✅ UpdateTableStatus command (masa durumunu güncelle)
-- ✅ TablesController (API endpoints)
+- ✅ GetAllTablesEndpoint, UpdateTableStatusEndpoint (API endpoints)
 - ✅ FluentValidation ile input validation
 
 ### 3. 📋 MenuItems (Menü Yönetimi) Feature
 
 - ✅ MenuItem entity
 - ✅ GetMenuItems query (kategori filtrelemeli)
-- ✅ MenuItemsController (API endpoints)
+- ✅ GetMenuItemsEndpoint (API endpoints)
 
 ### 4. 🍽️ Orders (Sipariş Yönetimi) Feature
 
@@ -29,7 +29,7 @@
 - ✅ CreateOrder command (sipariş oluşturma + business logic)
 - ✅ UpdateOrderStatus command (status transition validation)
 - ✅ GetKitchenOrders query (mutfak ekranı için)
-- ✅ OrdersController (API endpoints)
+- ✅ CreateOrderEndpoint, UpdateOrderStatusEndpoint, GetKitchenOrdersEndpoint (API endpoints)
 - ✅ FluentValidation ile complex validation
 
 ### 5. 🗄️ Database & Infrastructure
@@ -43,6 +43,7 @@
 
 - ✅ Ana README.md (detaylı kullanım kılavuzu)
 - ✅ ARCHITECTURE.md (mimari açıklaması ve diyagramlar)
+- ✅ ARCHITECTURE_TESTS.md (mimari testleri açıklaması)
 - ✅ API endpoint dokümantasyonu
 - ✅ Scalar/OpenAPI entegrasyonu
 
@@ -132,13 +133,13 @@ Features/Orders/    # Sipariş işlemleri
 ### 1. Mediator Usage
 
 ```csharp
-// Controller'da
+// Endpointler'de
 await _mediator.Send(new CreateOrderCommand(...));
 
 // Handler
-public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, OrderDto>
+public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, CreateOrderResponse>
 {
-    public async Task<OrderDto> Handle(...)
+    public async Task<CreateOrderResponse> Handle(...)
     {
         // Business logic
     }
@@ -159,7 +160,11 @@ public class CreateOrderValidator : AbstractValidator<CreateOrderCommand>
 
 ```
 CreateOrder/
-└── CreateOrderCommand.cs    # Command + Handler + Validator + DTO hepsi bir dosyada
+    │   ├── CreateOrderEndpoint.cs      # API endpoint
+    │   ├── CreateOrderHandler.cs       # İş mantığı handler
+    │   ├── CreateOrderRequest.cs       # Request DTO
+    │   ├── CreateOrderResponse.cs      # Response DTO
+    │   └── CreateOrderValidator.cs     # Validation kuralları
 ```
 
 ## 🔄 Sonraki Adımlar (Opsiyonel Geliştirmeler)
@@ -169,19 +174,9 @@ CreateOrder/
 3. **Reports Feature** - Raporlama ve analitik
 4. **Authentication** - Kullanıcı kimlik doğrulama
 5. **Real-time Updates** - SignalR ile mutfak ekranı güncellemeleri
-6. **Unit Tests** - Her handler için test'ler
-7. **Integration Tests** - API endpoint test'leri
 
 ## 📚 Kaynaklar
 
 - [Vertical Slice Architecture - Jimmy Bogard](https://jimmybogard.com/vertical-slice-architecture/)
 - [Mediator GitHub](https://github.com/martinothamar/Mediator)
 - [CQRS Pattern](https://martinfowler.com/bliki/CQRS.html)
-
-## 🎉 Sonuç
-
-Bu proje, **Vertical Slice Architecture** yaklaşımının pratik bir implementasyonudur.
-
-**Ana mesaj:** Feature'lar bazında düşün, katmanlar bazında değil!
-
-Her feature bağımsız, anlaşılır ve kolay geliştirilebilir. 🚀
