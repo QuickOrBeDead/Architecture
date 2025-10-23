@@ -2,6 +2,16 @@
 
 ###
 
+# Get all menu items
+GET {{RestaurantManagement.Api_HostAddress}}/api/menuitems
+
+###
+
+# Get menu items by category
+GET {{RestaurantManagement.Api_HostAddress}}/api/menuitems?category=Pasta
+
+###
+
 # Test Create Order with new CreateOrderRequest
 POST {{RestaurantManagement.Api_HostAddress}}/api/orders
 Content-Type: application/json
@@ -22,5 +32,21 @@ Content-Type: application/json
   ],
   "notes": "Customer has allergies"
 }
+
+###
+
+# Update order status
+# Status values: 0=Pending, 1=Confirmed, 2=Preparing, 3=Ready, 4=Served, 5=Completed, 6=Cancelled
+PUT {{RestaurantManagement.Api_HostAddress}}/api/orders/1/status
+Content-Type: application/json
+
+{
+  "status": 2
+}
+
+###
+
+# Get kitchen orders
+GET {{RestaurantManagement.Api_HostAddress}}/api/orders/kitchen
 
 ###
