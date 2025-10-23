@@ -1,0 +1,66 @@
+@RestaurantManagement.Api_HostAddress = http://localhost:5143
+
+# Get all tables
+GET {{RestaurantManagement.Api_HostAddress}}/api/tables
+
+###
+
+# Update table status
+# Status values: 1=Available, 2=Occupied, 3=Reserved, 4=Cleaning
+PUT {{RestaurantManagement.Api_HostAddress}}/api/tables/2/status
+Content-Type: application/json
+
+{
+  "status": 2
+}
+
+###
+
+# Get all menu items
+GET {{RestaurantManagement.Api_HostAddress}}/api/menuitems
+
+###
+
+# Get menu items by category
+GET {{RestaurantManagement.Api_HostAddress}}/api/menuitems?category=Pasta
+
+###
+
+# Test Create Order with new CreateOrderRequest
+POST {{RestaurantManagement.Api_HostAddress}}/api/orders
+Content-Type: application/json
+
+{
+  "tableId": 1,
+  "items": [
+    {
+      "menuItemId": 1,
+      "quantity": 2,
+      "specialInstructions": "No onions please"
+    },
+    {
+      "menuItemId": 2,
+      "quantity": 1,
+      "specialInstructions": null
+    }
+  ],
+  "notes": "Customer has allergies"
+}
+
+###
+
+# Update order status
+# Status values: 0=Pending, 1=Confirmed, 2=Preparing, 3=Ready, 4=Served, 5=Completed, 6=Cancelled
+PUT {{RestaurantManagement.Api_HostAddress}}/api/orders/1/status
+Content-Type: application/json
+
+{
+  "status": 2
+}
+
+###
+
+# Get kitchen orders
+GET {{RestaurantManagement.Api_HostAddress}}/api/orders/kitchen
+
+###
