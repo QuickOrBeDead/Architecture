@@ -4,6 +4,8 @@ using NetArchTest.Rules;
 using NUnit.Framework;
 using System.Reflection;
 
+using Mediator;
+
 [TestFixture]
 public class DesignPatternTests
 {
@@ -19,7 +21,7 @@ public class DesignPatternTests
             .And()
             .ResideInNamespace(FeaturesNamespace)
             .Should()
-            .ImplementInterface(typeof(Mediator.IRequestHandler<,>))
+            .ImplementInterface(typeof(IRequestHandler<,>))
             .GetResult();
 
         Assert.That(result.IsSuccessful, 
@@ -45,6 +47,23 @@ public class DesignPatternTests
     }
 
     [Test]
+    public void CommandAndQueries_ShouldBeSealed()
+    {
+        var result = Types.InAssembly(Assembly.Load(RestaurantApiAssembly))
+            .That()
+            .ImplementInterface(typeof(IRequest<>))
+            .And()
+            .ResideInNamespace(FeaturesNamespace)
+            .Should()
+            .BeSealed()
+            .GetResult();
+
+        Assert.That(result.IsSuccessful,
+            $"All command and queries should be sealed classes. " +
+            $"Violations: {string.Join(", ", result.FailingTypeNames ?? [])}");
+    }
+
+    [Test]
     public void Queries_ShouldImplementIRequest()
     {
         var result = Types.InAssembly(Assembly.Load(RestaurantApiAssembly))
@@ -53,7 +72,7 @@ public class DesignPatternTests
             .And()
             .ResideInNamespace(FeaturesNamespace)
             .Should()
-            .ImplementInterface(typeof(Mediator.IRequest<>))
+            .ImplementInterface(typeof(IRequest<>))
             .GetResult();
 
         Assert.That(result.IsSuccessful, 
@@ -70,7 +89,7 @@ public class DesignPatternTests
             .And()
             .ResideInNamespace(FeaturesNamespace)
             .Should()
-            .ImplementInterface(typeof(Mediator.IRequest<>))
+            .ImplementInterface(typeof(IRequest<>))
             .GetResult();
 
         Assert.That(result.IsSuccessful, 

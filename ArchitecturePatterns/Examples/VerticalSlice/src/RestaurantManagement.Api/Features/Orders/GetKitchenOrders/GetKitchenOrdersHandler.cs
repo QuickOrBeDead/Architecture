@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using RestaurantManagement.Api.Data;
 using RestaurantManagement.Api.Entities;
 
-public record GetKitchenOrdersQuery : IRequest<GetKitchenOrdersResponse>;
+public sealed record GetKitchenOrdersQuery : IRequest<GetKitchenOrdersResponse>;
 
 public sealed class GetKitchenOrdersHandler(RestaurantDbContext context)
     : IRequestHandler<GetKitchenOrdersQuery, GetKitchenOrdersResponse>

@@ -8,7 +8,7 @@ using RestaurantManagement.Api.Common;
 using RestaurantManagement.Api.Data;
 using RestaurantManagement.Api.Entities;
 
-public record UpdateTableStatusCommand(int TableId, TableStatus NewStatus) : IRequest<Result<UpdateTableStatusResponse>>;
+public sealed record UpdateTableStatusCommand(int TableId, TableStatus NewStatus) : IRequest<Result<UpdateTableStatusResponse>>;
 
 public sealed class UpdateTableStatusHandler(RestaurantDbContext context)
     : IRequestHandler<UpdateTableStatusCommand, Result<UpdateTableStatusResponse>>

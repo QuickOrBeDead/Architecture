@@ -260,6 +260,6 @@ public class StructuralTests
     private static bool IsAllowedSuffixType(string typeName)
     {
         var allowedSuffixes = new[] { "Dto", "Response", "Validator", "Endpoint", "Handler", "Query", "Command", "Request" };
-        return allowedSuffixes.Any(suffix => typeName.EndsWith(suffix));
+        return allowedSuffixes.Any(typeName.EndsWith);
     }
 }

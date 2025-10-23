@@ -8,7 +8,7 @@ using RestaurantManagement.Api.Features.MenuItems.GetMenuItems;
 
 namespace RestaurantManagement.Api.Features.Tables.GetAllTables;
 
-public record GetAllTablesQuery : IRequest<GetAllTablesResponse>;
+public sealed record GetAllTablesQuery : IRequest<GetAllTablesResponse>;
 
 public sealed class GetAllTablesHandler(RestaurantDbContext context) : IRequestHandler<GetAllTablesQuery, GetAllTablesResponse>
 {

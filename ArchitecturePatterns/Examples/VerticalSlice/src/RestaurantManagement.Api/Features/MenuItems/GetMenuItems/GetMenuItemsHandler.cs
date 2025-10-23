@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using RestaurantManagement.Api.Common;
 using RestaurantManagement.Api.Data;
 
-public record GetMenuItemsQuery(string? Category = null) : IRequest<Result<GetMenuItemsResponse>>;
+public sealed record GetMenuItemsQuery(string? Category = null) : IRequest<Result<GetMenuItemsResponse>>;
 
 public sealed class GetMenuItemsHandler(RestaurantDbContext context) : IRequestHandler<GetMenuItemsQuery, Result<GetMenuItemsResponse>>
 {

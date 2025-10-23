@@ -7,7 +7,7 @@ using RestaurantManagement.Api.Common;
 using RestaurantManagement.Api.Data;
 using RestaurantManagement.Api.Entities;
 
-public record CreateOrderCommand(int TableId, List<OrderItemRequest> Items, string? Notes) : IRequest<Result<CreateOrderResponse>>;
+public sealed record CreateOrderCommand(int TableId, List<OrderItemRequest> Items, string? Notes) : IRequest<Result<CreateOrderResponse>>;
 
 public sealed class CreateOrderHandler(RestaurantDbContext context) : IRequestHandler<CreateOrderCommand, Result<CreateOrderResponse>>
 {
